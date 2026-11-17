@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Everyday Shop</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <a href="#home" id="logo">Everyday Shop</a>
+
+        <nav aria-label="Main navigation">
+            <a href="#home">Home</a>
+            <a href="#browse">Browse</a>
+            <a href="#category">Category</a>
+            <button type="button" id="about-button">About</button>
+            <a href="#cart">
+                Cart (<span id="cart-count">0</span>)
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Home view: shown when the application starts -->
+        <section id="home">
+            <h1>Welcome to Everyday Shop</h1>
+            <p>Discover products for your everyday life.</p>
+
+            <a href="#browse">Browse Products</a>
+
+            <h2>Featured Products</h2>
+            <div id="featured-products"></div>
+        </section>
+
+        <!-- Browse view -->
+        <section id="browse" hidden>
+            <h1>Browse Products</h1>
+
+            <aside id="filters" aria-label="Product filters">
+                <h2>Filter Products</h2>
+            </aside>
+
+            <div id="browse-results">
+                <label for="sort-products">Sort by:</label>
+                <select id="sort-products" name="sort">
+                    <option value="name">Product Name (A–Z)</option>
+                    <option value="price">Price</option>
+                    <option value="category">Category</option>
+                </select>
+
+                <div id="active-filters"></div>
+
+                <button type="button" id="clear-filters">
+                    Clear All Filters
+                </button>
+
+                <div id="product-list"></div>
+            </div>
+        </section>
+
+        <!-- Category view -->
+        <section id="category" hidden>
+            <h1>Shop by Category</h1>
+            <div id="category-list"></div>
+        </section>
+
+        <!-- Single product view -->
+        <section id="single-product" hidden>
+            <h1>Product Details</h1>
+            <div id="product-details"></div>
+        </section>
+
+        <!-- Shopping cart view -->
+        <section id="cart" hidden>
+            <h1>Shopping Cart</h1>
+            <div id="cart-items"></div>
+            <div id="cart-summary"></div>
+        </section>
+    </main>
+
+    <!-- About dialog -->
+    <dialog id="about-dialog" aria-labelledby="about-title">
+        <button type="button" id="close-about">Close</button>
+
+        <h2 id="about-title">About Everyday Shop</h2>
+        <p>
+            A single-page shopping application for
+            COMP 3612 Assignment 2.
+        </p>
+        <p>Created by Allen Ye.</p>
+        <p>Built with HTML, CSS, and JavaScript.</p>
+
+        <a href="https://github.com/hye582/Comp3612Assignment2">
+            View GitHub Repository
+        </a>
+    </dialog>
+
+    <!-- Notification area -->
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <footer>
+        <p>COMP 3612 Assignment 2 — Everyday Shop</p>
+
+        <a href="https://github.com/hye582/Comp3612Assignment2">
+            GitHub Repository
+        </a>
+    </footer>
+</body>
+</html>
