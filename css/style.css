@@ -1,3 +1,14 @@
+/*
+    Framework: Bootstrap 5.3.9 (CSS only)
+    Source:
+    https://getbootstrap.com/docs/5.3/getting-started/introduction/
+
+    Custom CSS assistance: ChatGPT
+    Prompt: Provide a complete replacement stylesheet for the
+    existing Everyday Shop HTML, using Bootstrap CSS for buttons
+    and form controls while preserving the product detail layout.
+*/
+
 /* General page styles */
 * {
     box-sizing: border-box;
@@ -11,7 +22,7 @@ body {
     background-color: #f5f6f8;
 }
 
-/* Keep hidden views hidden, even when other rules set display */
+/* Preserve visibility controlled by HTML and JavaScript */
 [hidden] {
     display: none !important;
 }
@@ -20,23 +31,14 @@ a {
     color: #174ea6;
 }
 
+a:hover {
+    color: #123b7d;
+}
+
 button,
 input,
 select {
     font: inherit;
-}
-
-button {
-    padding: 0.6rem 1rem;
-    border: 1px solid #174ea6;
-    border-radius: 4px;
-    background-color: #174ea6;
-    color: white;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #123b7d;
 }
 
 a:focus-visible,
@@ -48,7 +50,17 @@ summary:focus-visible {
     outline-offset: 3px;
 }
 
-/* Shared header and navigation */
+/* Customize Bootstrap primary buttons */
+.btn-primary {
+    --bs-btn-bg: #174ea6;
+    --bs-btn-border-color: #174ea6;
+    --bs-btn-hover-bg: #123b7d;
+    --bs-btn-hover-border-color: #123b7d;
+    --bs-btn-active-bg: #123b7d;
+    --bs-btn-active-border-color: #123b7d;
+}
+
+/* Shared header */
 header {
     display: flex;
     justify-content: space-between;
@@ -82,19 +94,37 @@ header nav a:hover {
     text-decoration: underline;
 }
 
-/* Main content and footer */
+/* Main content */
 main {
     max-width: 1200px;
+    min-height: 70vh;
     margin: 0 auto;
     padding: 2rem 1rem;
-    min-height: 70vh;
 }
 
-footer {
-    padding: 1.5rem;
-    text-align: center;
-    background-color: #ffffff;
-    border-top: 1px solid #d4d9e0;
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Home */
+#home {
+    padding: 1rem 0;
+}
+
+#home > h2 {
+    margin-top: 2rem;
 }
 
 /* Product breadcrumb */
@@ -103,7 +133,7 @@ footer {
     font-size: 0.9rem;
 }
 
-/* Product image and information */
+/* Product detail layout */
 #product-details {
     display: flex;
     align-items: flex-start;
@@ -120,13 +150,20 @@ footer {
     min-width: 0;
 }
 
+/* Product image button */
 #open-product-image {
+    display: block;
     width: 100%;
     min-height: 250px;
     padding: 1rem;
     border: 1px solid #d4d9e0;
+    border-radius: 4px;
     background-color: #f5f6f8;
     cursor: zoom-in;
+}
+
+#open-product-image:hover {
+    background-color: #edf0f5;
 }
 
 #product-image {
@@ -136,8 +173,10 @@ footer {
     object-fit: contain;
 }
 
+/* Product information */
 #product-title {
     margin-top: 0;
+    margin-bottom: 1.5rem;
     font-size: 1.8rem;
 }
 
@@ -155,24 +194,32 @@ footer {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 #product-tags span {
     padding: 0.2rem 0.7rem;
     border-radius: 4px;
     background-color: #e8edf5;
+    font-size: 0.9rem;
 }
 
 #product-stock {
     font-weight: bold;
 }
 
+#product-description {
+    margin-bottom: 1.5rem;
+}
+
 #product-quantity {
     width: 5rem;
     margin: 0.5rem;
-    padding: 0.4rem;
-    border: 1px solid #687588;
-    border-radius: 4px;
+    vertical-align: middle;
+}
+
+#add-to-cart {
+    vertical-align: middle;
 }
 
 /* Specifications and reviews */
@@ -190,15 +237,25 @@ footer {
     cursor: pointer;
 }
 
-dt {
+#single-product summary:hover {
+    color: #174ea6;
+}
+
+#single-product dl {
+    margin-bottom: 0;
+}
+
+#single-product dt {
     margin-top: 1rem;
     font-weight: bold;
 }
 
-dd {
+#single-product dd {
     margin-left: 0;
+    margin-bottom: 0.5rem;
 }
 
+/* Scrollable review list */
 #product-reviews {
     max-height: 300px;
     overflow-y: auto;
@@ -214,15 +271,38 @@ dd {
     border-bottom: none;
 }
 
-/* About and product image dialogs */
+#product-reviews p {
+    margin-bottom: 0.5rem;
+}
+
+/* Browse controls */
+#sort-products {
+    max-width: 250px;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#active-filters {
+    margin-bottom: 1rem;
+}
+
+#clear-filters {
+    margin-bottom: 1rem;
+}
+
+/* Native dialogs */
 dialog {
     width: 90%;
     max-width: 650px;
     max-height: 85vh;
     overflow-y: auto;
+    margin: auto;
     padding: 1.5rem;
+    color: #243042;
+    background-color: #ffffff;
     border: none;
     border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
 dialog::backdrop {
@@ -233,6 +313,7 @@ dialog::backdrop {
 #close-product-image {
     display: block;
     margin-left: auto;
+    margin-bottom: 1rem;
 }
 
 #large-product-image {
@@ -243,6 +324,36 @@ dialog::backdrop {
     object-fit: contain;
 }
 
+/* Notification area: JavaScript will add and remove its text */
+#toast {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1100;
+    max-width: 350px;
+    padding: 1rem 1.5rem;
+    color: #ffffff;
+    background-color: #243042;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#toast:empty {
+    display: none;
+}
+
+/* Shared footer */
+footer {
+    padding: 1.5rem;
+    text-align: center;
+    background-color: #ffffff;
+    border-top: 1px solid #d4d9e0;
+}
+
+footer p {
+    margin-bottom: 0.5rem;
+}
+
 /* Small screens */
 @media (max-width: 700px) {
     header {
@@ -250,8 +361,18 @@ dialog::backdrop {
         align-items: flex-start;
     }
 
+    header nav {
+        gap: 0.75rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
     #product-details {
         flex-direction: column;
+        gap: 1.5rem;
+        padding: 1rem;
     }
 
     .product-image,
@@ -261,5 +382,15 @@ dialog::backdrop {
 
     #product-image {
         height: 250px;
+    }
+
+    #product-title {
+        font-size: 1.5rem;
+    }
+
+    #toast {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
     }
 }
