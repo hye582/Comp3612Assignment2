@@ -70,10 +70,84 @@
         </section>
 
         <!-- Single product view -->
-        <section id="single-product" hidden>
-            <h1>Product Details</h1>
-            <div id="product-details"></div>
-        </section>
+        <section id="single-product" hidden >
+            <nav aria-label="Breadcrumb">
+            <a href="#home">Home</a>
+            <span> &gt; </span>
+            <span id="breadcrumb-category">Category</span>
+            <span> &gt; </span>
+            <span id="breadcrumb-title">Product Title</span>
+        </nav>
+
+        <div id="product-details">
+            <!-- Product image -->
+            <div class="product-image">
+                <button type="button" id="open-product-image"
+                        aria-label="View larger product image">
+                    <img id="product-image" alt="" hidden>
+                </button>
+            </div>
+
+        <!-- Product information -->
+            <div class="product-information">
+                <h1 id="product-title">Product Title</h1>
+
+                <p id="product-price"></p>
+
+                <p>
+                    SKU: <span id="product-sku"></span>
+                </p>
+
+                <p id="product-rating"></p>
+
+                <div id="product-tags"></div>
+
+                <p id="product-stock"></p>
+
+                <p id="product-description"></p>
+
+                <label for="product-quantity">Quantity:</label>
+                <input type="number"
+                    id="product-quantity"
+                    name="quantity"
+                    min="1"
+                    step="1"
+                    value="1">
+
+                <button type="button" id="add-to-cart">
+                    Add to Cart
+                </button>
+            </div>
+        </div>
+
+    <!-- Expandable specifications -->
+    <details open>
+        <summary>Specifications</summary>
+
+        <dl>
+            <dt>Weight</dt>
+            <dd id="product-weight"></dd>
+
+            <dt>Dimensions</dt>
+            <dd id="product-dimensions"></dd>
+
+            <dt>Warranty</dt>
+            <dd id="product-warranty"></dd>
+
+            <dt>Shipping Information</dt>
+            <dd id="product-shipping"></dd>
+
+            <dt>Return Policy</dt>
+            <dd id="product-return-policy"></dd>
+        </dl>
+    </details>
+
+    <!-- Expandable reviews -->
+    <details>
+        <summary>Reviews</summary>
+        <div id="product-reviews"></div>
+    </details>
+</section>
 
         <!-- Shopping cart view -->
         <section id="cart" hidden>
@@ -98,6 +172,18 @@
         <a href="https://github.com/hye582/Comp3612Assignment2">
             View GitHub Repository
         </a>
+    </dialog>
+
+    <!-- Enlarged product image dialog -->
+    <dialog id="product-image-dialog"
+            aria-labelledby="image-dialog-title">
+        <button type="button" id="close-product-image">
+            Close
+        </button>
+
+        <h2 id="image-dialog-title">Product Image</h2>
+
+        <img id="large-product-image" alt="" hidden>
     </dialog>
 
     <!-- Notification area -->
