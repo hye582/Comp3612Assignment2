@@ -3,6 +3,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let products = [];
 
+    // Product image dialog
+const imageDialog = document.querySelector("#product-image-dialog");
+const largeImage = document.querySelector("#large-product-image");
+
+// Open the image dialog
+document.querySelector("#open-product-image")
+    .addEventListener("click", function () {
+        const productImage = document.querySelector("#product-image");
+
+        // Do not open the dialog before a product image is available
+        if (productImage.hidden || !productImage.getAttribute("src")) {
+            return;
+        }
+
+        largeImage.src = productImage.src;
+        largeImage.alt = productImage.alt;
+        largeImage.hidden = false;
+
+        document.querySelector("#image-dialog-title").textContent =
+            productImage.alt;
+
+        imageDialog.showModal();
+    });
+
+// Close the image dialog
+document.querySelector("#close-product-image")
+    .addEventListener("click", function () {
+        imageDialog.close();
+    });
+
     // Load the supplied product data
     fetch(url)
         .then(function (response) {
@@ -13,46 +43,185 @@ document.addEventListener("DOMContentLoaded", function () {
             return response.json();
         })
         .then(function (data) {
-        products = data.products;
+            products = data.products;
 
-        displayProduct(products[0]);
+            if (!Array.isArray(products) || products.length === 0) {
+                throw new Error("No product data is available.");
+            }
+
+            // Display the first product while developing this view
+            displayProduct(products[0]);
         })
         .catch(function (error) {
             console.error("Unable to load products:", error);
+
+            document.querySelector("#toast").textContent =
+                "Unable to load products. Please refresh and try again.";
         });
 
-        // Display one product in the existing HTML
-function displayProduct(product) {
-    document.querySelector("#product-title").textContent =
-        product.title;
+    // Display one product in the existing HTML
+    function displayProduct(product) {
+        // Basic product information
+        document.querySelector("#product-title").textContent =
+            product.title;
 
-    document.querySelector("#product-price").textContent =
-        "$" + product.price.toFixed(2);
+        document.querySelector("#product-price").textContent =
+            "$" + product.price.toFixed(2);
 
-    document.querySelector("#product-sku").textContent =
-        product.sku;
+        document.querySelector("#product-sku").textContent =
+            product.sku;
 
-    document.querySelector("#product-description").textContent =
-        product.description;
+        document.querySelector("#product-description").textContent =
+            product.description;
 
-    document.querySelector("#product-stock").textContent =
-        product.availabilityStatus;
+        document.querySelector("#product-stock").textContent =
+            product.availabilityStatus;
 
-    // Update the breadcrumb
-    document.querySelector("#breadcrumb-category").textContent =
-        product.category;
+        // Breadcrumb
+        document.querySelector("#breadcrumb-category").textContent =
+            product.category;
 
-    document.querySelector("#breadcrumb-title").textContent =
-        product.title;
+        document.querySelector("#breadcrumb-title").textContent =
+            product.title;
 
-    // Show the first image from the product's images array
-    const image = document.querySelector("#product-image");
+        // Main product image
+        const image = document.querySelector("#product-image");
 
-    image.src = product.images[0];
-    image.alt = product.title;
-    image.hidden = false;
+        image.src = product.images[0];
+        image.alt = product.title;
+        image.hidden = false;
 
-    // Reset the quantity when displaying a product
-    document.querySelector("#product-quantity").value = 1;
+        // Reset the quantity for the displayed product
+        document.querySelector("#product-quantity").value = 1;
+
+        // Product rating
+        const rating = document.querySelector("#product-rating");
+
+        rating.textContent =
+            createStars(product.rating) +
+            " (" + product.rating + " / 5)";
+
+        rating.setAttribute(
+            "aria-label",
+            "Rating: " + product.rating + " out of 5"
+        );
+
+        // Product tags
+        displayTags(product.tags);
+
+        // Product specifications
+        displaySpecifications(product);
+
+        // Product reviews
+        displayReviews(product.reviews);
+    }
+
+    // Convert a rating into five filled or empty stars
+    function createStars(rating) {
+        const roundedRating = Math.round(rating);
+        let stars = "";
+
+        for (let i = 1; i <= 5; i++) {
+            if (i <= roundedRating) {
+                stars += "★";
+            } else {
+                stars += "☆";
+            }
+        }
+
+        return stars;
+    }
+
+    // Display tags without keeping tags from a previous product
+    function displayTags(tags) {
+        const container = document.querySelector("#product-tags");
+        container.textContent = "";
+
+        tags.forEach(function (tag) {
+            const span = document.createElement("span");
+            span.textContent = tag;
+            container.appendChild(span);
+        });
+    }
+
+    // Display specifications using kg and cm
+    function displaySpecifications(product) {
+        document.querySelector("#product-weight").textContent =
+            product.weight + " kg";
+
+        document.querySelector("#product-dimensions").textContent =
+            "Width: " + product.dimensions.width + " cm, " +
+            "Height: " + product.dimensions.height + " cm, " +
+            "Depth: " + product.dimensions.depth + " cm";
+
+        document.querySelector("#product-warranty").textContent =
+            product.warrantyInformation;
+
+        document.querySelector("#product-shipping").textContent =
+            product.shippingInformation;
+
+        document.querySelector("#product-return-policy").textContent =
+            product.returnPolicy;
+    }
+
+    // Display the selected product's reviews
+    function displayReviews(reviews) {
+        const container = document.querySelector("#product-reviews");
+
+    // Remove reviews from the previously displayed product
+        container.textContent = "";
+
+        if (reviews.length === 0) {
+         container.textContent = "No reviews yet.";
+            return;
+        }
+
+        reviews.forEach(function (review) {
+            const article = document.createElement("article");
+
+        // Reviewer name
+            const name = document.createElement("h3");
+            name.textContent = review.reviewerName;
+
+        // Review rating
+            const rating = document.createElement("p");
+            rating.textContent =
+                createStars(review.rating) +
+                " (" + review.rating + " / 5)";
+
+            rating.setAttribute(
+                "aria-label",
+                "Rating: " + review.rating + " out of 5"
+            );
+
+        // Formatted review date
+            const dateParagraph = document.createElement("p");
+            const date = document.createElement("time");
+
+            date.dateTime = review.date;
+
+            date.textContent = new Date(review.date).toLocaleDateString(
+                "en-CA",
+            {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                timeZone: "UTC"
+            }
+        );
+
+        dateParagraph.appendChild(date);
+
+        // Review comment
+        const comment = document.createElement("p");
+        comment.textContent = review.comment;
+
+        article.appendChild(name);
+        article.appendChild(rating);
+        article.appendChild(dateParagraph);
+        article.appendChild(comment);
+
+        container.appendChild(article);
+    });
 }
 });
