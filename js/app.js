@@ -3,6 +3,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let products = [];
 
+    // Return to the home view
+const homeLinks = document.querySelectorAll('a[href="#home"]');
+
+for (const link of homeLinks) {
+    link.addEventListener("click", function () {
+        document.querySelector("#single-product").hidden = true;
+        document.querySelector("#home").hidden = false;
+    });
+}
+
     // Product image dialog
 const imageDialog = document.querySelector("#product-image-dialog");
 const largeImage = document.querySelector("#large-product-image");
