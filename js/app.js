@@ -49,8 +49,8 @@ document.querySelector("#close-product-image")
                 throw new Error("No product data is available.");
             }
 
-            // Display the first product while developing this view
-            displayProduct(products[0]);
+            // Show featured products after the product data has loaded
+            displayFeaturedProducts(products);
         })
         .catch(function (error) {
             console.error("Unable to load products:", error);
@@ -115,6 +115,29 @@ document.querySelector("#close-product-image")
         // Product reviews
         displayReviews(product.reviews);
     }
+
+    // Display the first two products on the home page
+function displayFeaturedProducts(products) {
+    const container = document.querySelector("#featured-products");
+    container.textContent = "";
+
+    for (let i = 0; i < products.length && i < 2; i++) {
+        const product = products[i];
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.textContent = product.title;
+
+        button.addEventListener("click", function () {
+            displayProduct(product);
+
+            document.querySelector("#home").hidden = true;
+            document.querySelector("#single-product").hidden = false;
+        });
+
+        container.appendChild(button);
+    }
+}
 
     // Convert a rating into five filled or empty stars
     function createStars(rating) {
