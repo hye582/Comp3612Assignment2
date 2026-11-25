@@ -189,12 +189,54 @@
 
         <!-- Shopping cart view -->
         <section id="cart" hidden>
-            <h1>Shopping Cart</h1>
+    <h1>Shopping Cart</h1>
+    <p id="cart-empty" hidden>Your cart is empty.</p>
 
-            <div id="cart-items"></div>
+    <div class="table-responsive">
+        <table id="cart-table" class="table align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Subtotal</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="cart-items"></tbody>
+        </table>
+    </div>
 
-            <div id="cart-summary"></div>
-        </section>
+    <fieldset id="shipping-options">
+        <legend>Shipping</legend>
+
+        <label for="shipping-method">Shipping method</label>
+        <select id="shipping-method" class="form-select mb-3">
+            <option value="Standard">Standard</option>
+            <option value="Express">Express</option>
+            <option value="Priority">Priority</option>
+        </select>
+
+        <label for="shipping-destination">Destination</label>
+        <select id="shipping-destination" class="form-select mb-3">
+            <option value="Canada">Canada</option>
+            <option value="United States">United States</option>
+            <option value="International">International</option>
+        </select>
+    </fieldset>
+
+    <div id="cart-summary">
+        <h2>Summary</h2>
+        <p>Merchandise: <span id="summary-merchandise">$0.00</span></p>
+        <p>Shipping: <span id="summary-shipping">$0.00</span></p>
+        <p>Tax: <span id="summary-tax">$0.00</span></p>
+        <p><strong>Total: <span id="summary-total">$0.00</span></strong></p>
+    </div>
+
+    <button type="button" id="checkout" class="btn btn-primary" disabled>
+        Checkout
+    </button>
+</section>
     </main>
 
     <!-- About dialog -->

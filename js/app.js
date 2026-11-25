@@ -13,6 +13,160 @@ document.addEventListener("DOMContentLoaded", function () {
 
 updateCartCount();
 
+// Save the cart after changing a quantity, removing an item, or checking out
+function saveCart() {
+    localStorage.setItem("everydayShopCart", JSON.stringify(cart));
+    updateCartCount();
+}
+
+function money(amount) {
+    return "$" + amount.toFixed(2);
+}
+
+// Add one cell to a table row
+function addCell(row, text) {
+    const cell = document.createElement("td");
+    cell.textContent = text;
+    row.appendChild(cell);
+    return cell;
+}
+
+// Create one row for one product in the cart
+function createCartRow(item, product) {
+    const row = document.createElement("tr");
+
+    const itemCell = addCell(row, "");
+    const image = document.createElement("img");
+    image.src = product.thumbnail;
+    image.alt = "";
+    image.width = 60;
+    image.height = 60;
+    itemCell.appendChild(image);
+
+    const title = document.createElement("span");
+    title.textContent = product.title;
+    itemCell.appendChild(title);
+
+    addCell(row, money(product.price));
+
+    const quantityCell = addCell(row, "");
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = "1";
+    input.step = "1";
+    input.value = item.quantity;
+    input.setAttribute("aria-label", "Quantity for " + product.title);
+    quantityCell.appendChild(input);
+
+    input.addEventListener("change", function () {
+        const quantity = Number(input.value);
+
+        if (quantity < 1 || quantity !== Math.floor(quantity)) {
+            input.value = item.quantity;
+            return;
+        }
+
+        item.quantity = quantity;
+        saveCart();
+        displayCart();
+    });
+
+    addCell(row, money(product.price * item.quantity));
+
+    const actionCell = addCell(row, "");
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "btn btn-outline-danger btn-sm";
+    removeButton.textContent = "Remove";
+    actionCell.appendChild(removeButton);
+
+    removeButton.addEventListener("click", function () {
+        cart = cart.filter(function (cartItem) {
+            return cartItem.id !== item.id;
+        });
+
+        saveCart();
+        displayCart();
+    });
+
+    return row;
+}
+
+// Calculate shipping using the rates on page 6 of the assignment
+function calculateShipping(merchandise, method, destination) {
+    if (cart.length === 0 || merchandise > 500) {
+        return 0;
+    }
+
+    const rates = {
+        Standard: { Canada: 10, "United States": 15, International: 20 },
+        Express:  { Canada: 25, "United States": 25, International: 30 },
+        Priority: { Canada: 35, "United States": 50, International: 50 }
+    };
+
+    return rates[method][destination];
+}
+
+function displayCart() {
+    const items = document.querySelector("#cart-items");
+    items.textContent = "";
+
+    const empty = cart.length === 0;
+    document.querySelector("#cart-empty").hidden = !empty;
+    document.querySelector("#cart-table").hidden = empty;
+    document.querySelector("#shipping-options").disabled = empty;
+    document.querySelector("#checkout").disabled = empty || products.length === 0;
+
+    let merchandise = 0;
+
+    for (const item of cart) {
+        const product = products.find(function (p) {
+            return p.id === item.id;
+        });
+
+        if (product) {
+            items.appendChild(createCartRow(item, product));
+            merchandise += product.price * item.quantity;
+        }
+    }
+
+    const method = document.querySelector("#shipping-method").value;
+    const destination = document.querySelector("#shipping-destination").value;
+    const shipping = calculateShipping(merchandise, method, destination);
+
+    let tax = 0;
+    if (destination === "Canada") {
+        tax = Math.round(merchandise * 0.05 * 100) / 100;
+    }
+
+    document.querySelector("#summary-merchandise").textContent = money(merchandise);
+    document.querySelector("#summary-shipping").textContent = money(shipping);
+    document.querySelector("#summary-tax").textContent = money(tax);
+    document.querySelector("#summary-total").textContent =
+        money(merchandise + shipping + tax);
+}
+
+// Changing either option updates the summary
+document.querySelector("#shipping-method")
+    .addEventListener("change", displayCart);
+
+document.querySelector("#shipping-destination")
+    .addEventListener("change", displayCart);
+
+document.querySelector("#checkout").addEventListener("click", function () {
+    cart = [];
+    saveCart();
+    displayCart();
+    showView("home");
+
+    const toast = document.querySelector("#toast");
+    toast.textContent = "Checkout complete. Thank you for your order!";
+
+    setTimeout(function () {
+        toast.textContent = "";
+    }, 3000);
+});
+
 function updateCartCount() {
     let total = 0;
 
@@ -47,20 +201,34 @@ document.querySelector("#add-to-cart").addEventListener("click", function () {
         cart.push({ id: currentProduct.id, quantity: quantity });
     }
 
-    localStorage.setItem("everydayShopCart", JSON.stringify(cart));
-    updateCartCount();
+    saveCart();
+
     message.textContent = "Added to cart: " + currentProduct.title;
 });
 
-    // Return to the home view
+    // Show one main view and hide the others
+function showView(id) {
+    const views = document.querySelectorAll("main > section");
+
+    for (const view of views) {
+        view.hidden = view.id !== id;
+    }
+}
+
 const homeLinks = document.querySelectorAll('a[href="#home"]');
 
 for (const link of homeLinks) {
     link.addEventListener("click", function () {
-        document.querySelector("#single-product").hidden = true;
-        document.querySelector("#home").hidden = false;
+        showView("home");
     });
 }
+
+const cartLink = document.querySelector('a[href="#cart"]');
+
+cartLink.addEventListener("click", function () {
+    showView("cart");
+    displayCart();
+});
 
     // Product image dialog
 const imageDialog = document.querySelector("#product-image-dialog");
@@ -110,6 +278,7 @@ document.querySelector("#close-product-image")
 
             // Show featured products after the product data has loaded
             displayFeaturedProducts(products);
+            displayCart();
         })
         .catch(function (error) {
             console.error("Unable to load products:", error);
@@ -190,11 +359,9 @@ function displayFeaturedProducts(products) {
         button.textContent = product.title;
 
         button.addEventListener("click", function () {
-            displayProduct(product);
-
-            document.querySelector("#home").hidden = true;
-            document.querySelector("#single-product").hidden = false;
-        });
+        displayProduct(product);
+        showView("single-product");
+    });
 
         container.appendChild(button);
     }
