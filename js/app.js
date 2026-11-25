@@ -177,33 +177,39 @@ function updateCartCount() {
     document.querySelector("#cart-count").textContent = total;
 }
 
+// Add a product from either the detail view or the browse view
+function addToCart(product, quantity) {
+    const existingItem = cart.find(function (item) {
+        return item.id === product.id;
+    });
+
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        cart.push({ id: product.id, quantity: quantity });
+    }
+
+    saveCart();
+    document.querySelector("#toast").textContent =
+        "Added to cart: " + product.title;
+}
+
+// On the detail page, use the quantity entered by the user
 document.querySelector("#add-to-cart").addEventListener("click", function () {
     if (!currentProduct) {
         return;
     }
 
     const quantity = Number(document.querySelector("#product-quantity").value);
-    const message = document.querySelector("#toast");
 
     if (quantity < 1 || quantity !== Math.floor(quantity)) {
-        message.textContent = "Please enter a positive whole number.";
+        document.querySelector("#toast").textContent =
+            "Please enter a positive whole number.";
         return;
     }
 
-    // Look for this product in the cart
-    let existingItem = cart.find(function (item) {
-        return item.id === currentProduct.id;
-    });
-
-    if (existingItem) {
-        existingItem.quantity += quantity;
-    } else {
-        cart.push({ id: currentProduct.id, quantity: quantity });
-    }
-
+    addToCart(currentProduct, quantity);
     saveCart();
-
-    message.textContent = "Added to cart: " + currentProduct.title;
 });
 
     // Show one main view and hide the others
@@ -228,6 +234,21 @@ const cartLink = document.querySelector('a[href="#cart"]');
 cartLink.addEventListener("click", function () {
     showView("cart");
     displayCart();
+});
+
+// Open Browse from the navigation bar or the home page
+const browseLinks = document.querySelectorAll('a[href="#browse"]');
+
+for (const link of browseLinks) {
+    link.addEventListener("click", function () {
+        showView("browse");
+        displayBrowse(products);
+    });
+}
+
+// Update the visible list when the sort order changes
+document.querySelector("#sort-products").addEventListener("change", function () {
+    displayBrowse(products);
 });
 
     // Product image dialog
@@ -279,6 +300,9 @@ document.querySelector("#close-product-image")
             // Show featured products after the product data has loaded
             displayFeaturedProducts(products);
             displayCart();
+            if (!document.querySelector("#browse").hidden) {
+            displayBrowse(products);
+            }
         })
         .catch(function (error) {
             console.error("Unable to load products:", error);
@@ -345,6 +369,94 @@ document.querySelector("#close-product-image")
         // Product reviews
         displayReviews(product.reviews);
     }
+
+    // Build one product card for the browse view
+function createBrowseCard(product) {
+    const card = document.createElement("article");
+    card.className = "card p-3 h-100";
+
+    // Both the image and the title open this product
+    const link = document.createElement("a");
+    link.href = "#single-product";
+
+    const image = document.createElement("img");
+    image.src = product.thumbnail;
+    image.alt = "";
+    image.className = "img-fluid";
+    image.width = 160;
+    image.height = 160;
+
+    const title = document.createElement("h3");
+    title.textContent = product.title;
+
+    link.appendChild(image);
+    link.appendChild(title);
+
+    link.addEventListener("click", function () {
+        displayProduct(product);
+        showView("single-product");
+    });
+
+    const price = document.createElement("p");
+    price.textContent = money(product.price);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn btn-primary mt-auto";
+    button.textContent = "Add to Cart";
+
+    button.addEventListener("click", function () {
+        addToCart(product, 1);
+    });
+
+    card.appendChild(link);
+    card.appendChild(price);
+    card.appendChild(button);
+
+    return card;
+}
+
+// Sort and display the products supplied to this function
+function displayBrowse(productList) {
+    const container = document.querySelector("#product-list");
+    const sortBy = document.querySelector("#sort-products").value;
+
+    container.textContent = "";
+    container.className = "row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 mt-2";
+
+    // sort() changes an array, so sort a separate list
+    const sortedProducts = [];
+    for (const product of productList) {
+        sortedProducts.push(product);
+    }
+
+    sortedProducts.sort(function (a, b) {
+        if (sortBy === "price") {
+            return a.price - b.price;
+        }
+
+        if (sortBy === "category") {
+            const categoryOrder = a.category.localeCompare(b.category);
+            if (categoryOrder !== 0) {
+                return categoryOrder;
+            }
+        }
+
+        return a.title.localeCompare(b.title);
+    });
+
+    if (sortedProducts.length === 0) {
+        container.textContent = "No matching products.";
+        return;
+    }
+
+    for (const product of sortedProducts) {
+        const column = document.createElement("div");
+        column.className = "col";
+        column.appendChild(createBrowseCard(product));
+        container.appendChild(column);
+    }
+}
 
     // Display the first two products on the home page
 function displayFeaturedProducts(products) {
