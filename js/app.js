@@ -2,6 +2,55 @@ document.addEventListener("DOMContentLoaded", function () {
     const url = "./data/data-minifed.json";
 
     let products = [];
+    let currentProduct;
+    let cart = [];
+
+    const savedCart = localStorage.getItem("everydayShopCart");
+
+    if (savedCart !== null) {
+        cart = JSON.parse(savedCart);
+    }
+
+updateCartCount();
+
+function updateCartCount() {
+    let total = 0;
+
+    for (const item of cart) {
+        total += item.quantity;
+    }
+
+    document.querySelector("#cart-count").textContent = total;
+}
+
+document.querySelector("#add-to-cart").addEventListener("click", function () {
+    if (!currentProduct) {
+        return;
+    }
+
+    const quantity = Number(document.querySelector("#product-quantity").value);
+    const message = document.querySelector("#toast");
+
+    if (quantity < 1 || quantity !== Math.floor(quantity)) {
+        message.textContent = "Please enter a positive whole number.";
+        return;
+    }
+
+    // Look for this product in the cart
+    let existingItem = cart.find(function (item) {
+        return item.id === currentProduct.id;
+    });
+
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        cart.push({ id: currentProduct.id, quantity: quantity });
+    }
+
+    localStorage.setItem("everydayShopCart", JSON.stringify(cart));
+    updateCartCount();
+    message.textContent = "Added to cart: " + currentProduct.title;
+});
 
     // Return to the home view
 const homeLinks = document.querySelectorAll('a[href="#home"]');
@@ -71,6 +120,8 @@ document.querySelector("#close-product-image")
 
     // Display one product in the existing HTML
     function displayProduct(product) {
+            currentProduct = product;
+
         // Basic product information
         document.querySelector("#product-title").textContent =
             product.title;
