@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const url = "./data/data-minifed.json";
+    const productsUrl = "https://dummyjson.com/products";
+    const catalogKey = "everydayShopProducts";
 
     let products = [];
     let currentProduct;
@@ -214,7 +215,7 @@ document.querySelector("#add-to-cart").addEventListener("click", function () {
     }
 
     addToCart(currentProduct, quantity);
-    saveCart();
+    
 });
 
     // Show one main view and hide the others
@@ -377,38 +378,85 @@ document.querySelector("#close-product-image")
         imageDialog.close();
     });
 
-    // Load the supplied product data
-    fetch(url)
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error("HTTP error: " + response.status);
-            }
-
-            return response.json();
-        })
-        .then(function (data) {
-            products = data.products;
-
-            if (!Array.isArray(products) || products.length === 0) {
-                throw new Error("No product data is available.");
-            }
-
-            buildFilterChoices();
-            displayCategories();
-            displayFeaturedProducts(products);
-            displayCart();
-
-            if (!document.querySelector("#browse").hidden) {
-                applyBrowseFilters();
+// Read JSON from the API
+function fetchJson(address) {
+    return fetch(address).then(function (response) {
+        if (!response.ok) {
+            throw new Error("HTTP error: " + response.status);
         }
+
+        return response.json();
+    });
+}
+
+// Build the views after the catalog is ready
+function prepareCatalog(list) {
+    products = list;
+
+    buildFilterChoices();
+    displayCategories();
+    displayFeaturedProducts(products);
+    displayCart();
+
+    if (!document.querySelector("#browse").hidden) {
+        applyBrowseFilters();
+    }
+}
+
+// Use the saved catalog if available; otherwise fetch it once
+function loadCatalog() {
+    const saved = localStorage.getItem(catalogKey);
+
+    if (saved !== null) {
+        try {
+            const list = JSON.parse(saved);
+
+            if (Array.isArray(list) && list.length > 0) {
+                prepareCatalog(list);
+                return;
+            }
+        } catch (error) {
+            console.warn("Could not read the saved catalog:", error);
+        }
+
+        localStorage.removeItem(catalogKey);
+    }
+
+    fetchJson(productsUrl + "?limit=100")
+        .then(function (data) {
+            if (!Array.isArray(data.products) || data.products.length === 0) {
+                throw new Error("No products were returned.");
+            }
+
+            try {
+                localStorage.setItem(catalogKey, JSON.stringify(data.products));
+            } catch (error) {
+                console.warn("Could not save the catalog:", error);
+            }
+
+            prepareCatalog(data.products);
         })
         .catch(function (error) {
             console.error("Unable to load products:", error);
-
             document.querySelector("#toast").textContent =
                 "Unable to load products. Please refresh and try again.";
         });
+}
 
+loadCatalog();
+
+    // Load the selected product before showing its details
+    function openProduct(id) {
+    fetchJson(productsUrl + "/" + id)
+        .then(function (product) {
+            displayProduct(product);
+            showView("single-product");
+        })
+        .catch(function (error) {
+            console.error("Unable to load this product:", error);
+            showToast("Unable to open this product. Please try again.");
+        });
+}
     // Display one product in the existing HTML
     function displayProduct(product) {
             currentProduct = product;
@@ -491,8 +539,7 @@ function createBrowseCard(product) {
     link.appendChild(title);
 
     link.addEventListener("click", function () {
-        displayProduct(product);
-        showView("single-product");
+        openProduct(product.id);
     });
 
     const price = document.createElement("p");
@@ -696,21 +743,29 @@ function displayBrowse(productList) {
     // Display the first two products on the home page
 function displayFeaturedProducts(products) {
     const container = document.querySelector("#featured-products");
+    const heroImage = document.querySelector("#home-hero-image");
+
     container.textContent = "";
 
+    if (products.length === 0) {
+        heroImage.hidden = true;
+        return;
+    }
+
+    // Use the first featured product as the home page image
+    const firstProduct = products[0];
+    heroImage.src = firstProduct.images[0];
+    heroImage.alt = firstProduct.title;
+    heroImage.hidden = false;
+
+    // Reuse the same product cards as the Browse view
     for (let i = 0; i < products.length && i < 2; i++) {
-        const product = products[i];
-        const button = document.createElement("button");
+        const column = document.createElement("div");
+        column.className = "col";
 
-        button.type = "button";
-        button.textContent = product.title;
-
-        button.addEventListener("click", function () {
-        displayProduct(product);
-        showView("single-product");
-    });
-
-        container.appendChild(button);
+        const card = createBrowseCard(products[i]);
+        column.appendChild(card);
+        container.appendChild(column);
     }
 }
 
