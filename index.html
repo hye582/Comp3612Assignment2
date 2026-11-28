@@ -67,6 +67,25 @@
             <aside id="filters" aria-label="Product filters">
                 <h2>Filter Products</h2>
                 <!-- Filter controls will be added here -->
+                 <details open>
+                <summary>Name</summary>
+                <label for="filter-name">Product name</label>
+                <input type="search" id="filter-name" class="form-control"
+                    placeholder="Search by name">
+                </details>
+
+                <details>
+                    <summary>Price</summary>
+                    <label for="filter-price-rule">Show prices</label>
+                    <select id="filter-price-rule" class="form-select">
+                    <option value="under">Under</option>
+                    <option value="over">Over</option>
+                    </select>
+
+                <label for="filter-price">Amount ($)</label>
+                <input type="number" id="filter-price" class="form-control"
+                    min="0" step="0.01" placeholder="Enter an amount">
+                </details>
             </aside>
 
             <div id="browse-results">

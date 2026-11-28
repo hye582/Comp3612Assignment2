@@ -242,13 +242,30 @@ const browseLinks = document.querySelectorAll('a[href="#browse"]');
 for (const link of browseLinks) {
     link.addEventListener("click", function () {
         showView("browse");
-        displayBrowse(products);
+        applyBrowseFilters();
     });
 }
 
 // Update the visible list when the sort order changes
 document.querySelector("#sort-products").addEventListener("change", function () {
-    displayBrowse(products);
+    applyBrowseFilters();
+});
+
+document.querySelector("#filter-name")
+    .addEventListener("input", applyBrowseFilters);
+
+document.querySelector("#filter-price")
+    .addEventListener("input", applyBrowseFilters);
+
+document.querySelector("#filter-price-rule")
+    .addEventListener("change", applyBrowseFilters);
+
+document.querySelector("#clear-filters").addEventListener("click", function () {
+    document.querySelector("#filter-name").value = "";
+    document.querySelector("#filter-price").value = "";
+    document.querySelector("#filter-price-rule").value = "under";
+
+    applyBrowseFilters();
 });
 
     // Product image dialog
@@ -301,7 +318,7 @@ document.querySelector("#close-product-image")
             displayFeaturedProducts(products);
             displayCart();
             if (!document.querySelector("#browse").hidden) {
-            displayBrowse(products);
+            applyBrowseFilters();
             }
         })
         .catch(function (error) {
@@ -414,6 +431,64 @@ function createBrowseCard(product) {
     card.appendChild(button);
 
     return card;
+}
+
+// Apply the selected filters before sorting and displaying the results
+function applyBrowseFilters() {
+    const name = document.querySelector("#filter-name").value.trim();
+    const priceInput = document.querySelector("#filter-price");
+    const rule = document.querySelector("#filter-price-rule").value;
+    const activeFilters = document.querySelector("#active-filters");
+
+    if (!priceInput.validity.valid) {
+        activeFilters.textContent = "Enter a valid price of $0 or more.";
+        displayBrowse([]);
+        return;
+    }
+
+    const priceText = priceInput.value;
+    const amount = Number(priceText);
+    const searchName = name.toLowerCase();
+
+    const matches = products.filter(function (product) {
+        if (name !== "" && !product.title.toLowerCase().includes(searchName)) {
+            return false;
+        }
+
+        if (priceText !== "") {
+            if (rule === "under" && product.price >= amount) {
+                return false;
+            }
+
+            if (rule === "over" && product.price <= amount) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    const labels = [];
+
+    if (name !== "") {
+        labels.push("Name: " + name);
+    }
+
+    if (priceText !== "") {
+        if (rule === "under") {
+            labels.push("Under " + money(amount));
+        } else {
+            labels.push("Over " + money(amount));
+        }
+    }
+
+    if (labels.length === 0) {
+        activeFilters.textContent = "Showing all products.";
+    } else {
+        activeFilters.textContent = "Active filters: " + labels.join(" | ");
+    }
+
+    displayBrowse(matches);
 }
 
 // Sort and display the products supplied to this function
