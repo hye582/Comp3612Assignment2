@@ -4,6 +4,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let products = [];
     let currentProduct;
     let cart = [];
+    let toastTimer;
+
+    function showToast(message) {
+        const toast = document.querySelector("#toast");
+
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+
+        toastTimer = setTimeout(function () {
+            toast.textContent = "";
+        }, 3000);
+    }   
 
     const savedCart = localStorage.getItem("everydayShopCart");
 
@@ -159,12 +171,7 @@ document.querySelector("#checkout").addEventListener("click", function () {
     displayCart();
     showView("home");
 
-    const toast = document.querySelector("#toast");
-    toast.textContent = "Checkout complete. Thank you for your order!";
-
-    setTimeout(function () {
-        toast.textContent = "";
-    }, 3000);
+    showToast("Checkout complete. Thank you for your order!");
 });
 
 function updateCartCount() {
@@ -190,8 +197,7 @@ function addToCart(product, quantity) {
     }
 
     saveCart();
-    document.querySelector("#toast").textContent =
-        "Added to cart: " + product.title;
+    showToast("Added to cart: " + product.title);
 }
 
 // On the detail page, use the quantity entered by the user
@@ -203,8 +209,7 @@ document.querySelector("#add-to-cart").addEventListener("click", function () {
     const quantity = Number(document.querySelector("#product-quantity").value);
 
     if (quantity < 1 || quantity !== Math.floor(quantity)) {
-        document.querySelector("#toast").textContent =
-            "Please enter a positive whole number.";
+        showToast("Please enter a positive whole number.");
         return;
     }
 
@@ -332,6 +337,16 @@ document.querySelector('a[href="#category"]').addEventListener("click", function
     showView("category");
 });
 
+// About dialog
+const aboutDialog = document.querySelector("#about-dialog");
+
+document.querySelector("#about-button").addEventListener("click", function () {
+    aboutDialog.showModal();
+});
+
+document.querySelector("#close-about").addEventListener("click", function () {
+    aboutDialog.close();
+});
     // Product image dialog
 const imageDialog = document.querySelector("#product-image-dialog");
 const largeImage = document.querySelector("#large-product-image");
