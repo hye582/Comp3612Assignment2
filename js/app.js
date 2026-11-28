@@ -265,6 +265,9 @@ document.querySelector("#clear-filters").addEventListener("click", function () {
     document.querySelector("#filter-price").value = "";
     document.querySelector("#filter-price-rule").value = "under";
 
+    for (const box of document.querySelectorAll('#filters input[type="checkbox"]')) {
+    box.checked = false;
+}
     applyBrowseFilters();
 });
 
@@ -314,6 +317,8 @@ document.querySelector("#close-product-image")
                 throw new Error("No product data is available.");
             }
 
+            buildFilterChoices();
+            displayFeaturedProducts(products);
             // Show featured products after the product data has loaded
             displayFeaturedProducts(products);
             displayCart();
@@ -433,6 +438,52 @@ function createBrowseCard(product) {
     return card;
 }
 
+// Add one labeled checkbox to a filter group
+function addFilterCheckbox(container, group, value, text) {
+    const label = document.createElement("label");
+    label.className = "d-block";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = group;
+    checkbox.value = value;
+    checkbox.addEventListener("change", applyBrowseFilters);
+
+    const caption = document.createElement("span");
+    caption.textContent = " " + text;
+
+    label.appendChild(checkbox);
+    label.appendChild(caption);
+    container.appendChild(label);
+}
+
+// Build the choices once after the products load
+function buildFilterChoices() {
+    const categoryBox = document.querySelector("#filter-categories");
+    const ratingBox = document.querySelector("#filter-ratings");
+    categoryBox.textContent = "";
+    ratingBox.textContent = "";
+
+    const categories = [];
+
+    for (const product of products) {
+        if (!categories.includes(product.category)) {
+            categories.push(product.category);
+        }
+    }
+
+    categories.sort();
+
+    for (const category of categories) {
+        addFilterCheckbox(categoryBox, "category", category, category);
+    }
+
+    for (let stars = 1; stars <= 5; stars++) {
+        const text = stars === 1 ? "1 star" : stars + " stars";
+        addFilterCheckbox(ratingBox, "rating", stars, text);
+    }
+}
+
 // Apply the selected filters before sorting and displaying the results
 function applyBrowseFilters() {
     const name = document.querySelector("#filter-name").value.trim();
@@ -449,6 +500,16 @@ function applyBrowseFilters() {
     const priceText = priceInput.value;
     const amount = Number(priceText);
     const searchName = name.toLowerCase();
+    const selectedCategories = [];
+    const selectedRatings = [];
+
+    for (const box of document.querySelectorAll('input[name="category"]:checked')) {
+        selectedCategories.push(box.value);
+    }
+
+    for (const box of document.querySelectorAll('input[name="rating"]:checked')) {
+        selectedRatings.push(Number(box.value));
+    }
 
     const matches = products.filter(function (product) {
         if (name !== "" && !product.title.toLowerCase().includes(searchName)) {
@@ -466,6 +527,13 @@ function applyBrowseFilters() {
         }
 
         return true;
+        if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+        return false;
+    }
+
+        if (selectedRatings.length > 0 && !selectedRatings.includes(Math.round(product.rating))) {
+        return false;
+    }
     });
 
     const labels = [];
@@ -483,6 +551,13 @@ function applyBrowseFilters() {
     }
 
     if (labels.length === 0) {
+        if (selectedCategories.length > 0) {
+        labels.push("Category: " + selectedCategories.join(", "));
+    }
+
+        if (selectedRatings.length > 0) {
+        labels.push("Stars: " + selectedRatings.join(", "));
+    }
         activeFilters.textContent = "Showing all products.";
     } else {
         activeFilters.textContent = "Active filters: " + labels.join(" | ");
